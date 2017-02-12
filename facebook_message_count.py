@@ -20,9 +20,9 @@ class FbHTMLParser(HTMLParser):
         self.tag_dict = {}
 
     def handle_starttag(self, tag, attrs):
-        if tag == 'img' or tag == 'input' or tag == 'br':
-            return
-        self.level += 1
+        if not (tag == 'img' or tag == 'input' or tag == 'br'):
+            self.level += 1
+
         if attrs and len(attrs[0]) >= 2:
             if attrs[0][1] == self.name_of_message:
                 self.enter_messages_level = self.level
