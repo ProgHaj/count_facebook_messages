@@ -17,9 +17,10 @@ class FbHTMLParser(HTMLParser):
         self.enter_message_chunk_level = -1
         self._messages = False
         self.name_of_message = name_of_message
+        self.tag_dict = {}
 
     def handle_starttag(self, tag, attrs):
-        if tag == 'img':
+        if tag == 'img' or tag == 'input' or tag == 'br':
             return
         self.level += 1
         if attrs and len(attrs[0]) >= 2:
@@ -40,6 +41,12 @@ class FbHTMLParser(HTMLParser):
                 self.message_count += 1
                 self.in_message_flag = True
 
+        if not tag in self.tag_dict:
+            self.tag_dict[tag] = 0
+
+        self.tag_dict[tag] += 1
+
+
     def handle_endtag(self, tag):
         self.level -= 1
         if self.in_message_flag and self.level < self.in_message_level:
@@ -49,6 +56,8 @@ class FbHTMLParser(HTMLParser):
             self._messages = False
         if self.enter_messages_flag and self.level < self.enter_messages_level:
             self.enter_messages_flag = False
+
+        self.tag_dict[tag] -= 1
 
     def handle_data(self, data):
         if self.in_message_flag:
@@ -61,6 +70,8 @@ def main(text_to_parse, name_of_message='Meddelanden'):
     parser = FbHTMLParser(name_of_message)
     parser.feed(text_to_parse)
     print("Count:", parser.message_count)
+    print("Level:", parser.level)
+    print("tags:", parser.tag_dict)
 
 
 if __name__ == '__main__':
